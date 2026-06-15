@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package rate_limiter;
+
+service RateLimiter {
+
+    rpc Evaluate(EvaluateRequest)
+    returns (EvaluateResponse);
+
+}
+
+message Dimension {
+
+    string key = 1;
+
+    string value = 2;
+
+}
+
+message EvaluateRequest {
+
+    repeated Dimension dimensions = 1;
+
+    bool dry_run = 2;
+
+}
+
+message EvaluateResponse {
+
+    enum Decision {
+
+        UNKNOWN = 0;
+
+        ALLOWED = 1;
+
+        DENIED = 2;
+
+    }
+
+    Decision decision = 1;
+
+    string matched_rule_id = 2;
+
+}

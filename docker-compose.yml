@@ -1,0 +1,33 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis-server
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  rate_limiter:
+    build: .
+    container_name: rate-limiter
+    ports:
+      - "50051:50051"
+      - "3000:3000"
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - GRPC_PORT=50051
+      - REST_PORT=3000
+      - WORKER_COUNT=${WORKER_COUNT:-12}
+      - REDIS_POOL_SIZE=${REDIS_POOL_SIZE:-8}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/"]
+      interval: 5s
+      timeout: 3s
+      start_period: 15s
+      retries: 5
